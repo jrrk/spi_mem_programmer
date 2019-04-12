@@ -9,6 +9,7 @@
 `define CMD_BE 8'hC7
 `define CMD_PP 8'h02
 `define CMD_QCFR 8'h0B
+`define CMD_OTPR 8'h4B
 
 `define JEDEC_ID 8'h20
 

@@ -33,7 +33,7 @@ module clk_for_spi(
         .COMPENSATION         ("ZHOLD"),
         .STARTUP_WAIT         ("FALSE"),
         .DIVCLK_DIVIDE        (1),
-        .CLKFBOUT_MULT_F      (10.000),
+        .CLKFBOUT_MULT_F      (20.000),
         .CLKFBOUT_PHASE       (0.000),
         .CLKFBOUT_USE_FINE_PS ("FALSE"),
         .CLKOUT0_DIVIDE_F     (25.000),

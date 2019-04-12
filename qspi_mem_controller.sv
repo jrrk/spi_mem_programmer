@@ -14,7 +14,8 @@
 `define STATE_RDVECR 9
 `define STATE_RDSR 10
 `define STATE_MIORDID 11
-
+`define STATE_OTPR 12
+`define STATE_CUSTOMCMD 15
 
 module qspi_mem_controller(
         input clk,
@@ -23,7 +24,7 @@ module qspi_mem_controller(
         input quad,
         input [7:0] cmd,
         input [(3+256)*8-1:0] data_send, //max: 256B page data + 3B address
-        output reg [7:0] readout,
+        output reg [63:0] readout,
         output reg busy,
         output reg error,
 
@@ -36,8 +37,8 @@ module qspi_mem_controller(
     
     reg [260*8-1:0] data_in;
     reg [8:0] data_in_count;
-    wire [7:0] data_out;
-    reg data_out_count;
+    wire [63:0] data_out;
+    reg [7:0] data_out_count;
     
     reg [35:0] delay_counter;
     
@@ -85,11 +86,10 @@ module qspi_mem_controller(
                                 state <= `STATE_RDVECR;
                             `CMD_RDSR:
                                 state <= `STATE_RDSR;
-                            default: begin
-                                $display("ERROR: unknown command!");
-                                $display(cmd);
-                                $stop;
-                            end
+                            `CMD_OTPR:
+                                state <= `STATE_OTPR;
+                            default:
+                                state <= `STATE_CUSTOMCMD;
                         endcase
                     end else
                         busy <= 0;
@@ -214,6 +214,24 @@ module qspi_mem_controller(
                     delay_counter <= `tSEmax*`input_freq;
                end
                 
+                `STATE_OTPR: begin
+                    data_in <= {`CMD_OTPR, data_send[23:0]};
+                    data_in_count <= 4; // 1 byte command + 3 bytes address
+                    data_out_count <= data_send[31:24];
+                    spi_trigger <= 1;
+                    state <= `STATE_WAIT;
+                    nextstate <= `STATE_IDLE;
+                end                
+
+                `STATE_CUSTOMCMD: begin
+                    data_in <= {cmd, data_send[23:0]};
+                    data_in_count <= 4; // 1 byte command + 3 bytes address
+                    data_out_count <= data_send[31:24];
+                    spi_trigger <= 1;
+                    state <= `STATE_WAIT;
+                    nextstate <= `STATE_IDLE;
+                end                
+
             endcase
     end
     

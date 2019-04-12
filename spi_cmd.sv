@@ -12,9 +12,9 @@ module spi_cmd(
         input trigger,
         output reg busy,
         input [8:0] data_in_count,
-        input data_out_count,
+        input [7:0] data_out_count,
         input [260*8-1:0] data_in, //max len is: 256B data + 1B cmd + 3B addr
-        output reg [7:0] data_out,
+        output reg [63:0] data_out,
         input quad,
         
         //SPI interface
@@ -72,7 +72,7 @@ module spi_cmd(
                     end else begin
                         if(data_out_count>0) begin
                             state <= `STATE_READ;
-                            bit_cntr <= 7+1; //7+1 because read happens on falling edge
+                            bit_cntr <= data_out_count*8; //7+1 because read happens on falling edge
                         end
                         else begin
                             state <= `STATE_IDLE;
@@ -105,11 +105,25 @@ module spi_cmd(
         else
             if(state==`STATE_READ) begin
                 if(quad)
-                    data_out <= {data_out[3:0], DQio[3], DQio[2], DQio[1], DQio[0]};
+                    data_out <= {data_out[59:0], DQio[3], DQio[2], DQio[1], DQio[0]};
                 else
-                    data_out <= {data_out[6:0], DQio[1]};
+                    data_out <= {data_out[62:0], DQio[1]};
             end
     end
 
-    
+xlnx_ila qspi_ila (
+        .clk(clk), // input wire clk
+        .probe0(S), // input wire [0:0]  probe0  
+        .probe1(quad), // input wire [0:0]  probe1 
+        .probe2(oe), // input wire [0:0]  probe2 
+        .probe3(DQ), // input wire [3:0]  probe3 
+        .probe4(busy), // input wire [0:0]  probe4 
+        .probe5(bit_cntr), // input wire [0:0]  probe5 
+        .probe6(state), // input wire [3:0]  probe6 
+        .probe7(data_out), // input wire [0:0]  probe7
+        .probe8(data_out_count), // input wire [0:0]  probe7
+        .probe9(data_in_count), // input wire [0:0]  probe7
+        .probe10(width) // input wire [0:0]  probe7
+);
+
 endmodule

@@ -9,7 +9,7 @@ module dword_interface(
         input [31:0] data_from_PC,
         output reg busy, 
         output error,
-        output [7:0] readout,
+        output [63:0] readout,
 
 `ifndef  __SYNTHESIS__
         output clk_to_mem_out,
