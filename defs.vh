@@ -10,6 +10,8 @@
 `define CMD_PP 8'h02
 `define CMD_QCFR 8'h0B
 `define CMD_OTPR 8'h4B
+`define CMD_BRWR 8'h17
+`define CMD_READ 8'h03
 
 `define JEDEC_ID 8'h20
 

@@ -14,7 +14,8 @@
 `define STATE_RDVECR 9
 `define STATE_RDSR 10
 `define STATE_MIORDID 11
-`define STATE_OTPR 12
+`define STATE_READ 12
+`define STATE_BRWR 13
 `define STATE_CUSTOMCMD 15
 
 module qspi_mem_controller(
@@ -86,8 +87,9 @@ module qspi_mem_controller(
                                 state <= `STATE_RDVECR;
                             `CMD_RDSR:
                                 state <= `STATE_RDSR;
+                            `CMD_READ,
                             `CMD_OTPR:
-                                state <= `STATE_OTPR;
+                                state <= `STATE_READ;
                             default:
                                 state <= `STATE_CUSTOMCMD;
                         endcase
@@ -98,7 +100,7 @@ module qspi_mem_controller(
                 `STATE_RDID: begin
                     data_in <= `CMD_RDID;
                     data_in_count <= 1;
-                    data_out_count <= 1;
+                    data_out_count <= 8;
                     spi_trigger <= 1;
                     state <= `STATE_WAIT;
                     nextstate <= `STATE_IDLE;
@@ -111,7 +113,7 @@ module qspi_mem_controller(
                 `STATE_MIORDID: begin
                     data_in <= `CMD_MIORDID;
                     data_in_count <= 1;
-                    data_out_count <= 1;
+                    data_out_count <= 8;
                     spi_trigger <= 1;
                     state <= `STATE_WAIT;
                     nextstate <= `STATE_IDLE;
@@ -214,8 +216,8 @@ module qspi_mem_controller(
                     delay_counter <= `tSEmax*`input_freq;
                end
                 
-                `STATE_OTPR: begin
-                    data_in <= {`CMD_OTPR, data_send[23:0]};
+                `STATE_READ: begin
+                    data_in <= {cmd, data_send[23:0]};
                     data_in_count <= 4; // 1 byte command + 3 bytes address
                     data_out_count <= data_send[31:24];
                     spi_trigger <= 1;
@@ -223,10 +225,19 @@ module qspi_mem_controller(
                     nextstate <= `STATE_IDLE;
                 end                
 
+                `STATE_BRWR: begin
+                    data_in <= {`CMD_BRWR, data_send[7:0]};
+                    data_in_count <= 2;
+                    data_out_count <= 0;
+                    spi_trigger <= 1;
+                    state <= `STATE_WAIT;
+                    nextstate <= `STATE_IDLE;
+                end
+
                 `STATE_CUSTOMCMD: begin
-                    data_in <= {cmd, data_send[23:0]};
-                    data_in_count <= 4; // 1 byte command + 3 bytes address
-                    data_out_count <= data_send[31:24];
+                    data_in <= data_send >> 8;
+                    data_in_count <= data_send[7:4];
+                    data_out_count <= data_send[3:0];
                     spi_trigger <= 1;
                     state <= `STATE_WAIT;
                     nextstate <= `STATE_IDLE;
