@@ -111,6 +111,7 @@ module spi_cmd(
             end
     end
 
+`ifdef XLNX_ILA_QSPI
 xlnx_ila qspi_ila (
         .clk(clk), // input wire clk
         .probe0(S), // input wire [0:0]  probe0  
@@ -125,5 +126,6 @@ xlnx_ila qspi_ila (
         .probe9(data_in_count), // input wire [0:0]  probe7
         .probe10(width) // input wire [0:0]  probe7
 );
-
+`endif //  `ifdef XLNX_ILA_QSPI
+   
 endmodule
