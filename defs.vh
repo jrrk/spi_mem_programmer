@@ -19,3 +19,6 @@
 `define tBEmax 'd250_000 //ms
 `define tSEmax 'd3_000 //ms
 `define input_freq 'd31_250 //kHz
+
+//`define maxcmd 256
+`define maxcmd 16

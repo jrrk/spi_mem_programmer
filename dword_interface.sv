@@ -56,7 +56,7 @@ module dword_interface(
     reg trigger;
     reg quad;
     reg [7:0] cmd;
-    reg [259*8-1:0] data_send;
+    reg [(3+`maxcmd)*8-1:0] data_send;
     reg [7:0] len;
     wire mc_busy;
 
@@ -102,7 +102,7 @@ module dword_interface(
                 1: begin
                     if (len > 0) begin
                         if (wr) begin
-                            data_send <= {data_send[259*8-1-32:0], data_from_PC}; // shifting in the data
+                            data_send <= {data_send[(3+`maxcmd)*8-1-32:0], data_from_PC}; // shifting in the data
                             len <= len-1;
                         end
                     end else begin

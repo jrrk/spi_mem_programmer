@@ -24,7 +24,7 @@ module qspi_mem_controller(
         input trigger,
         input quad,
         input [7:0] cmd,
-        input [(3+256)*8-1:0] data_send, //max: 256B page data + 3B address
+        input [(3+`maxcmd)*8-1:0] data_send, //max: 256B page data + 3B address
         output reg [63:0] readout,
         output reg busy,
         output reg error,
@@ -36,7 +36,7 @@ module qspi_mem_controller(
     reg spi_trigger;
     wire spi_busy;
     
-    reg [260*8-1:0] data_in;
+    reg [(4+`maxcmd)*8-1:0] data_in;
     reg [8:0] data_in_count;
     wire [63:0] data_out;
     reg [7:0] data_out_count;
