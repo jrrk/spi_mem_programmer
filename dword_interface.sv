@@ -10,46 +10,28 @@ module dword_interface(
         output reg busy, 
         output error,
         output [63:0] readout,
-
-`ifndef  __SYNTHESIS__
-        output clk_to_mem_out,
-`endif
         inout [3:0] DQio,
         output S
     );
    
-    wire clk_to_mem, clk_spi;
-
-`ifndef  __SYNTHESIS__
-    assign clk_to_mem_out = clk_to_mem;
-`endif
- 
-    clk_for_spi clk_spi_inst
-      (
-       .clk_in1(clk_in),       // input clk_in1,   62.5MHz
-       .clk_out1(clk_spi),     // output clk_out1, half input freq
-       .clk_out2(clk_to_mem),  // output clk_out2, clk_out1 inverted
-       .reset(reset)           // input reset       
-    );      
-
     STARTUPE2 #(
-       .PROG_USR("FALSE"),  // Activate program event security feature. Requires encrypted bitstreams.
-       .SIM_CCLK_FREQ(10.0)  // Set the Configuration Clock Frequency(ns) for simulation.
+       .PROG_USR("FALSE"),      // Activate program event security feature. Requires encrypted bitstreams.
+       .SIM_CCLK_FREQ(10.0)     // Set the Configuration Clock Frequency(ns) for simulation.
     )
     STARTUPE2_inst (
         .CFGCLK(),              // 1-bit output: Configuration main clock output
         .CFGMCLK(),             // 1-bit output: Configuration internal oscillator clock output
-        .EOS(),              // 1-bit output: Active high output signal indicating the End Of Startup.
+        .EOS(),                 // 1-bit output: Active high output signal indicating the End Of Startup.
         .PREQ(),                // 1-bit output: PROGRAM request to fabric output
         .CLK(1'b0),             // 1-bit input: User start-up clock input
         .GSR(1'b0),             // 1-bit input: Global Set/Reset input (GSR cannot be used for the port name)
         .GTS(1'b0),             // 1-bit input: Global 3-state input (GTS cannot be used for the port name)
         .KEYCLEARB(1'b0),       // 1-bit input: Clear AES Decrypter Key input from Battery-Backed RAM (BBRAM)
-        .PACK(1'b0),             // 1-bit input: PROGRAM acknowledge input
-        .USRCCLKO(clk_to_mem),   // 1-bit input: User CCLK input
-        .USRCCLKTS(1'b0), // 1-bit input: User CCLK 3-state enable input
-        .USRDONEO(1'b1),   // 1-bit input: User DONE pin output control
-        .USRDONETS(1'b1)  // 1-bit input: User DONE 3-state enable output
+        .PACK(1'b0),            // 1-bit input: PROGRAM acknowledge input
+        .USRCCLKO(~clk_in),     // 1-bit input: User CCLK input
+        .USRCCLKTS(1'b0),       // 1-bit input: User CCLK 3-state enable input
+        .USRDONEO(1'b1),        // 1-bit input: User DONE pin output control
+        .USRDONETS(1'b1)        // 1-bit input: User DONE 3-state enable output
     );
  
     reg [3:0] state;
@@ -60,9 +42,8 @@ module dword_interface(
     reg [7:0] len;
     wire mc_busy;
 
-
     qspi_mem_controller mc(
-    .clk(clk_spi), 
+    .clk(clk_in), 
     .reset(reset),
     .S(S), 
     .DQio(DQio),
