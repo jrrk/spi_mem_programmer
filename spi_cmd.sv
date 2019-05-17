@@ -11,8 +11,8 @@ module spi_cmd(
         input reset,
         input trigger,
         output reg busy,
-        input [8:0] data_in_count,
-        input [7:0] data_out_count,
+        input [11:0] data_in_count,
+        input [11:0] data_out_count,
         input [(4+`maxcmd)*8-1:0] data_in, //max len is: 256B data + 1B cmd + 3B addr
         output reg [63:0] data_out,
         input quad,
@@ -49,7 +49,7 @@ module spi_cmd(
                     if(trigger && !busy) begin
                         state<=`STATE_SEND;
                         busy <= 1;
-                        bit_cntr <= data_in_count*8 - 1;   
+                        bit_cntr <= data_in_count;   
                      end else begin
                         S <= 1;
                         busy <= 0;
@@ -72,7 +72,7 @@ module spi_cmd(
                     end else begin
                         if(data_out_count>0) begin
                             state <= `STATE_READ;
-                            bit_cntr <= data_out_count*8; //7+1 because read happens on falling edge
+                            bit_cntr <= data_out_count; //7+1 because read happens on falling edge
                         end
                         else begin
                             state <= `STATE_IDLE;
@@ -112,7 +112,7 @@ module spi_cmd(
     end
 
 `ifdef XLNX_ILA_QSPI
-xlnx_ila qspi_ila (
+xlnx_ila_qspi qspi_ila (
         .clk(clk), // input wire clk
         .probe0(S), // input wire [0:0]  probe0  
         .probe1(quad), // input wire [0:0]  probe1 

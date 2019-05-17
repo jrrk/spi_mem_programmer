@@ -37,11 +37,12 @@ module dword_interface(
     reg [3:0] state;
     reg trigger;
     reg quad;
-    reg [7:0] cmd;
-    reg [(3+`maxcmd)*8-1:0] data_send;
-    reg [7:0] len;
+    reg [(3+`maxcmd)*8-1:0] data_in;
+    reg [6:0] len;
     wire mc_busy;
-
+    reg [11:0] data_in_count;
+    reg [11:0] data_out_count;
+ 
     qspi_mem_controller mc(
     .clk(clk_in), 
     .reset(reset),
@@ -49,8 +50,9 @@ module dword_interface(
     .DQio(DQio),
     .trigger(trigger),
     .quad(quad),
-    .cmd(cmd),
-    .data_send(data_send),
+    .data_in_count(data_in_count),
+    .data_out_count(data_out_count),
+    .data_in(data_in),
     .readout(readout),
     .busy(mc_busy),
     .error(error));
@@ -72,9 +74,10 @@ module dword_interface(
                     end else begin
                         if(!busy && wr) begin
                             busy <= 1;
-                            cmd <= data_from_PC[7:0];
-                            len <= data_from_PC[15:8];
-                            quad <= data_from_PC[16];
+                            data_in_count <= data_from_PC[11:0];
+                            data_out_count <= data_from_PC[23:12];
+                            len <= data_from_PC[30:24];
+                            quad <= data_from_PC[31];
                             state <= state+1;
                         end
                     end
@@ -83,7 +86,7 @@ module dword_interface(
                 1: begin
                     if (len > 0) begin
                         if (wr) begin
-                            data_send <= {data_send[(3+`maxcmd)*8-1-32:0], data_from_PC}; // shifting in the data
+                            data_in <= {data_in[(3+`maxcmd)*8-1-32:0], data_from_PC}; // shifting in the data
                             len <= len-1;
                         end
                     end else begin
