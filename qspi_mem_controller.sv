@@ -13,7 +13,7 @@ module qspi_mem_controller(
         input quad,
         input [11:0] data_in_count,
         input [11:0] data_out_count,
-        input [(3+`maxcmd)*8-1:0] data_in, //max: 256B page data + 3B address
+        input [`maxcmd*8-1:0] data_in, //max: 256B page data + 3B address
         output reg [63:0] readout,
         output reg busy,
         output reg error,
@@ -67,7 +67,10 @@ module qspi_mem_controller(
                     spi_trigger <= 1;
                     state <= `STATE_WAIT;
                     nextstate <= `STATE_IDLE;
-                end                
+                end      
+
+              default:
+                state <= `STATE_IDLE;
 
             endcase
     end

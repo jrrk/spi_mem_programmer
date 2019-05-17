@@ -13,7 +13,7 @@ module spi_cmd(
         output reg busy,
         input [11:0] data_in_count,
         input [11:0] data_out_count,
-        input [(4+`maxcmd)*8-1:0] data_in, //max len is: 256B data + 1B cmd + 3B addr
+        input [`maxcmd*8-1:0] data_in, //max len is: 256B data + 1B cmd + 3B addr
         output reg [63:0] data_out,
         input quad,
         
